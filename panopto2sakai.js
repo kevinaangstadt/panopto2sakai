@@ -239,6 +239,8 @@ function generateAssignments(assignments, grades) {
         label.innerText = a.display;
         label.dataset.key = a.key;
 
+        const score = clone.querySelector('.score');
+
         check.addEventListener("change", function() {
             score.disabled = !check.checked;
         });
