@@ -1,23 +1,6 @@
 // GLOBAL for tracking 4.0 grading
 let fourPoint;
 
-const scores = {
-    "0.0": { "score": 0.0, "cutoff": 0},
-    "1.0": { "score": 1.0, "cutoff": 60},
-    "1.25": { "score": 1.25, "cutoff": 62},
-    "1.5": { "score": 1.5, "cutoff": 64},
-    "1.75": { "score": 1.75, "cutoff": 67},
-    "2.0": { "score": 2.0, "cutoff": 70},
-    "2.25": { "score": 2.25, "cutoff": 73},
-    "2.5": { "score": 2.5, "cutoff": 76},
-    "2.75": { "score": 2.75, "cutoff": 80},
-    "3.0": { "score": 3.0, "cutoff": 83},
-    "3.25": { "score": 3.25, "cutoff": 87},
-    "3.5": { "score": 3.5, "cutoff": 90},
-    "3.75": { "score": 3.75, "cutoff": 93},
-    "4.0": { "score": 4.0, "cutoff": 96},
-};
-
 
 // ref: http://stackoverflow.com/a/1293163/2343
 // This will parse a delimited string into an array of
@@ -325,7 +308,7 @@ function generateAssignments(assignments, grades) {
 
         var downloadLink = document.createElement('a');
         downloadLink.setAttribute('href', 'data:application/octet-stream,' + encodeURIComponent(data));
-        downloadLink.setAttribute('download', `Perusall_Grades_${new Date().toISOString()}.csv`);
+        downloadLink.setAttribute('download', `Panopto_Grades_${new Date().toISOString()}.csv`);
 
         downloadLink.style.display = 'none';
         document.body.appendChild(downloadLink);
@@ -338,50 +321,39 @@ function generateAssignments(assignments, grades) {
     container.appendChild(submit);
 }
 
-function fourPointLookup(completion) {
-
-    function lower_bound(arry, val, left=0, right=arry.length) {
-        while (right > left) {
-            let mid = Math.floor(left + (right - left) / 2);
-            if (arry[mid].cutoff <= val)
-                left = mid + 1;
-            else
-                right = mid;
-        } // while
-
-        return left;
-    }
-
-    const index = Math.max(lower_bound(Object.values(scores), completion)-1, 0);
-    return Object.values(scores)[index].score;
-    
-}
-
 function generateSakaiCSV(assignments, grades) {
     // make the header
-    const sk_assignments = assignments.map(function(a) {
+    const sk_assignments = assignments.reduce(function(list, a) {
         if (fourPoint){
             // point value will always be 4 in this case
-            return `"${a.name}[4]"`;
+            list.push(`"${a.name}[4]"`);
         } else {
-            return `"${a.name}[${a.total}]"`;
+            list.push(`"${a.name}[${a.total}]"`);
         }
-    });
+
+        // comment
+        list.push(`"* ${a.name}"`);
+
+        return list;
+    }, []);
     const header = `"Student ID","Name",${sk_assignments.join()}`;
 
     // make the grades
-    const entries = grades.map(function(grade) {
-        const grades = assignments.map(function(a) {
+    const entries = Object.values(grades).map(function(grade) {
+        const grades = assignments.reduce(function(list, a) {
             const completion = grade[a.key];
 
             if (fourPoint) {
                 // look up in table
-                return `"${fourPointLookup(completion)}"`;
+                list.push(`"${fourPointLookup(completion)}"`);
             } else {
                 const score = completion / 100 * a.total;
-                return `"${score}"`;
+                list.push(`"${score}"`);
             } 
-        });
+
+            list.push(`${completion}% viewed`);
+            return list;
+        }, []);
 
         return `"${grade.id}","${grade.name}",${grades.join()}`;
     });
@@ -389,7 +361,7 @@ function generateSakaiCSV(assignments, grades) {
     return `${header}\n${entries.join("\n")}`;
 }
 
-window.onload = function() {
+window.addEventListener("load", function() {
     // fourpoint grading?
     const useFourPoint = document.querySelector("#useFourPoint")
     fourPoint = useFourPoint.checked;
@@ -403,4 +375,4 @@ window.onload = function() {
         const completion = parsePanopto(await inputElement.files[0].text());
         generateAssignments(completion.assignments, completion.grades);
     })
-}
+});

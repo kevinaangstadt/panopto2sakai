@@ -1,0 +1,16 @@
+{
+    "0.0": { "score": 0.0, "cutoff": 0},
+    "1.0": { "score": 1.0, "cutoff": 60},
+    "1.25": { "score": 1.25, "cutoff": 62},
+    "1.5": { "score": 1.5, "cutoff": 64},
+    "1.75": { "score": 1.75, "cutoff": 67},
+    "2.0": { "score": 2.0, "cutoff": 70},
+    "2.25": { "score": 2.25, "cutoff": 73},
+    "2.5": { "score": 2.5, "cutoff": 76},
+    "2.75": { "score": 2.75, "cutoff": 80},
+    "3.0": { "score": 3.0, "cutoff": 83},
+    "3.25": { "score": 3.25, "cutoff": 87},
+    "3.5": { "score": 3.5, "cutoff": 90},
+    "3.75": { "score": 3.75, "cutoff": 93},
+    "4.0": { "score": 4.0, "cutoff": 96}
+}
