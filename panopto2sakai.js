@@ -153,7 +153,7 @@ function parsePanopto(data) {
         throw `Unrecognized format. The initial header items were ${header.slice(0,4)}`
     }
 
-    if (header.length !== 14) {
+    if (header.length < 14) {
         throw `Unxexpected number of columns in file`;
     }
 
@@ -319,6 +319,8 @@ function generateAssignments(assignments, grades) {
     })
 
     container.appendChild(submit);
+
+    updateFourPoint();
 }
 
 function generateSakaiCSV(assignments, grades) {
@@ -361,13 +363,23 @@ function generateSakaiCSV(assignments, grades) {
     return `${header}\n${entries.join("\n")}`;
 }
 
+function updateFourPoint() {
+    fourPoint = useFourPoint.checked;
+
+    // hide/show rubrics button
+    const cutoffs = document.querySelector("#rubricButton");
+    cutoffs.hidden = !fourPoint;
+
+    // hide/show score files
+    const scoreFields = document.querySelectorAll(".score");
+    scoreFields.forEach(e => {e.hidden = fourPoint;} );
+}
+
 window.addEventListener("load", function() {
     // fourpoint grading?
     const useFourPoint = document.querySelector("#useFourPoint")
     fourPoint = useFourPoint.checked;
-    useFourPoint.addEventListener("change", function() {
-        fourPoint = useFourPoint.checked;
-    });
+    useFourPoint.addEventListener("change", updateFourPoint);
 
     const inputElement = document.querySelector("#formFile");
 

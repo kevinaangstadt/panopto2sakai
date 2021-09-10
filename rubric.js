@@ -1,3 +1,5 @@
+const store = window.localStorage;
+
 let scores;
 
 function fourPointLookup(completion) {
@@ -27,6 +29,19 @@ function populateTable() {
     });
 }
 
+function saveGrades() {
+    store.setItem("scores", JSON.stringify(scores));
+}
+
+async function loadSavedOrDefaultGrades() {
+    const storedScores = store.getItem("scores");
+    if (storedScores) {
+        scores = JSON.parse(storedScores);
+    } else {
+        await loadDefaultGrades();
+    }
+}
+
 async function loadDefaultGrades() {
     const defaultRubric = await (await fetch("default_rubric.json")).json();
     scores = defaultRubric;
@@ -34,7 +49,7 @@ async function loadDefaultGrades() {
 
 window.addEventListener("load", async function() {
     if(!scores) {
-        await loadDefaultGrades();
+        await loadSavedOrDefaultGrades();
     }
 
     populateTable();
@@ -42,11 +57,15 @@ window.addEventListener("load", async function() {
     Object.values(scores).forEach(function(v) {
         const selector = `#grade-${Math.round(v.score * 100).toString().padStart(3, '0')}`;
         const entry = document.querySelector(selector);
-        entry.addEventListener("change", () => { v.cutoff = parseFloat(entry.value); });
+        entry.addEventListener("change", () => { 
+            v.cutoff = parseFloat(entry.value); 
+            saveGrades();
+        });
     });
 
     document.querySelector("#rubricReset").addEventListener("click", async function() {
         await loadDefaultGrades();
+        saveGrades();
         populateTable();
     });
 });
